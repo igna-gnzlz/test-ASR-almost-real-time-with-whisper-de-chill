@@ -6,6 +6,7 @@ const stopButton = document.getElementById("stopButton");
 const status = document.getElementById("status");
 const audioContainer = document.getElementById("audioContainer");
 const campoDeTexto = document.getElementById("transcription");
+const modelSelect = document.getElementById("model");
 
 // Comenzar grabación
 startButton.addEventListener("click", async () => {
@@ -37,7 +38,9 @@ startButton.addEventListener("click", async () => {
 
       formData.append("file", audioBlob, "recording.webm");
 
-      status.textContent = "Estado: transcribiendo...";
+      formData.append("model", modelSelect.value);
+
+      status.textContent = "Estado: Transcribiendo...";
 
       try {
         const response = await fetch("http://localhost:8000/transcribe", {
@@ -49,25 +52,25 @@ startButton.addEventListener("click", async () => {
 
         campoDeTexto.value = data.text;
 
-        status.textContent = "Estado: transcripción finalizada";
+        status.textContent = "Estado: Transcripción finalizada";
       } catch (error) {
         console.error("Error", error);
 
-        status.textContent = "Estado: error de transcripción";
+        status.textContent = "Estado: Error de transcripción";
       }
     });
 
     // Comenzar
     mediaRecorder.start();
 
-    status.textContent = "Estado: grabando";
+    status.textContent = "Estado: Grabando";
 
     startButton.disabled = true;
     stopButton.disabled = false;
   } catch (error) {
     console.error("Error al acceder al micrófono:", error);
 
-    status.textContent = "Estado: no se pudo acceder al micrófono";
+    status.textContent = "Estado: No se pudo acceder al micrófono";
 
     alert(
       "No se pudo acceder al micrófono. " +
@@ -89,7 +92,7 @@ stopButton.addEventListener("click", () => {
     track.stop();
   });
 
-  status.textContent = "Estado: detenido";
+  status.textContent = "Estado: Detenido";
 
   startButton.disabled = false;
   stopButton.disabled = true;
