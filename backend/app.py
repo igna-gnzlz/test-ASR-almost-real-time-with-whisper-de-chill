@@ -1,5 +1,5 @@
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, UploadFile, File, Form
+from fastapi.middleware.cors import CORSMiddleware
 import whisperx
 import tempfile
 import os

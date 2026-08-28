@@ -34,6 +34,18 @@ startButton.addEventListener("click", async () => {
         type: mediaRecorder.mimeType,
       });
 
+      // Crear URL temporal para reproducir el audio
+      const audioUrl = URL.createObjectURL(audioBlob);
+
+      // Mostrar reproductor
+      const audio = document.createElement("audio");
+
+      audio.controls = true;
+      audio.src = audioUrl;
+
+      audioContainer.innerHTML = "";
+      audioContainer.appendChild(audio);
+
       const formData = new FormData();
 
       formData.append("file", audioBlob, "recording.webm");
