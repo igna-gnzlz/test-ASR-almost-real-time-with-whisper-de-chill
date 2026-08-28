@@ -1,5 +1,5 @@
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, UploadFile, File, Form
 import whisperx
 import tempfile
 import os
@@ -14,12 +14,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-model = whisperx.load_model(
-    "tiny",
-    device="cpu",
-    compute_type="int8",
-    language="es"
-)
+models = {}
 
 
 @app.get("/")
@@ -28,7 +23,19 @@ def root():
 
 
 @app.post("/transcribe")
-async def transcribe(file: UploadFile = File(...)):
+async def transcribe(file: UploadFile = File(...), model: str = Form(...)):
+
+    if model not in models:
+        print(f"Cargando modelo: {model}")
+
+        models[model] = whisperx.load_model(
+            model,
+            device="cpu",
+            compute_type="int8",
+            language="es"
+        )
+
+    model = models[model]
 
     with tempfile.NamedTemporaryFile(delete=False, suffix=".webm") as temp:
         content = await file.read()
