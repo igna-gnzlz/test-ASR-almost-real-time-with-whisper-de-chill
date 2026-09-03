@@ -7,6 +7,14 @@ const status = document.getElementById("status");
 const audioContainer = document.getElementById("audioContainer");
 const campoDeTexto = document.getElementById("transcription");
 const modelSelect = document.getElementById("model");
+const audioFile = document.getElementById("audioFile");
+const transcribeFileButton = document.getElementById("transcribeFileButton");
+const transcribeRecordingButton = document.getElementById(
+  "transcribeRecordingButton",
+);
+const transcriptionTime = document.getElementById("transcriptionTime");
+
+let recordedAudioBlob = null;
 
 // Comenzar grabación
 startButton.addEventListener("click", async () => {
@@ -34,6 +42,22 @@ startButton.addEventListener("click", async () => {
         type: mediaRecorder.mimeType,
       });
 
+      recordedAudioBlob = audioBlob;
+
+      transcribeRecordingButton.disabled = false;
+
+      // Crear URL temporal para reproducir el audio
+      const audioUrl = URL.createObjectURL(audioBlob);
+
+      // Mostrar reproductor
+      const audio = document.createElement("audio");
+
+      audio.controls = true;
+      audio.src = audioUrl;
+
+      audioContainer.innerHTML = "";
+      audioContainer.appendChild(audio);
+
       const formData = new FormData();
 
       formData.append("file", audioBlob, "recording.webm");
@@ -43,12 +67,20 @@ startButton.addEventListener("click", async () => {
       status.textContent = "Estado: Transcribiendo...";
 
       try {
+        const startTime = performance.now();
+
         const response = await fetch("http://localhost:8000/transcribe", {
           method: "POST",
           body: formData,
         });
 
         const data = await response.json();
+
+        const endTime = performance.now();
+
+        const elapsedTime = (endTime - startTime) / 1000;
+
+        transcriptionTime.textContent = `Tiempo de transcripción: ${elapsedTime.toFixed(2)} segundos`;
 
         campoDeTexto.value = data.text;
 
@@ -96,4 +128,69 @@ stopButton.addEventListener("click", () => {
 
   startButton.disabled = false;
   stopButton.disabled = true;
+});
+
+transcribeRecordingButton.addEventListener("click", async () => {
+  if (!recordedAudioBlob) {
+    return;
+  }
+
+  const formData = new FormData();
+
+  formData.append("file", recordedAudioBlob, "recording.webm");
+
+  formData.append("model", modelSelect.value);
+
+  status.textContent = "Estado: transcribiendo grabación...";
+
+  try {
+    const response = await fetch("http://localhost:8000/transcribe", {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await response.json();
+
+    document.getElementById("transcription").value = data.text;
+
+    status.textContent = "Estado: transcripción finalizada";
+  } catch (error) {
+    console.error(error);
+
+    status.textContent = "Estado: error de transcripción";
+  }
+});
+
+transcribeFileButton.addEventListener("click", async () => {
+  const file = audioFile.files[0];
+
+  if (!file) {
+    alert("Seleccioná un archivo de audio.");
+    return;
+  }
+
+  const formData = new FormData();
+
+  formData.append("file", file, file.name);
+
+  formData.append("model", modelSelect.value);
+
+  status.textContent = "Estado: transcribiendo archivo...";
+
+  try {
+    const response = await fetch("http://localhost:8000/transcribe", {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await response.json();
+
+    document.getElementById("transcription").value = data.text;
+
+    status.textContent = "Estado: transcripción finalizada";
+  } catch (error) {
+    console.error(error);
+
+    status.textContent = "Estado: error de transcripción";
+  }
 });

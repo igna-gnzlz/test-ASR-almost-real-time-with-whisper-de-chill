@@ -1,8 +1,9 @@
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, UploadFile, File, Form
+from fastapi.middleware.cors import CORSMiddleware
 import whisperx
 import tempfile
 import os
+import time
 
 app = FastAPI()
 
@@ -17,6 +18,7 @@ app.add_middleware(
 models = {}
 
 
+
 @app.get("/")
 def root():
     return {"status": "ok"}
@@ -24,6 +26,8 @@ def root():
 
 @app.post("/transcribe")
 async def transcribe(file: UploadFile = File(...), model: str = Form(...)):
+
+    inicio = time.time()
 
     if model not in models:
         print(f"Cargando modelo: {model}")
@@ -51,6 +55,11 @@ async def transcribe(file: UploadFile = File(...), model: str = Form(...)):
             segment["text"]
             for segment in result["segments"]
         )
+
+        fin = time.time()
+
+        print(f"Inicio: {inicio:.2f} Fin: {fin:.2f} Total: {fin - inicio:.2f}")
+        print(text)
 
         return {
             "text": text
