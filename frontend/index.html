@@ -70,6 +70,27 @@
         <option value="medium">Medium</option>
     </select>
 
+    <div class="file-section">
+        <h2>Transcribir archivo</h2>
+
+        <input
+            type="file"
+            id="audioFile"
+            accept="audio/*"
+        >
+
+        <button id="transcribeFileButton">
+            Transcribir archivo
+        </button>
+    </div>
+
+    <div class="recording-section">
+        <h2>Grabación actual</h2>
+
+        <button id="transcribeRecordingButton" disabled>
+            Transcribir grabación
+        </button>
+    </div>
     <div class="controls">
         <button id="startButton">
             Comenzar
@@ -80,6 +101,7 @@
         </button>
     </div>
 
+    <p id="transcriptionTime"></p>
     <div id="audioContainer"></div>
     
     <textarea
